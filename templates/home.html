@@ -1,0 +1,14 @@
+<!-- templates/home.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Welcome to Our Social Media Management System</h1>
+    <p>Your one-stop solution for managing social media posts.</p>
+    {% if user.is_authenticated %}
+        <p>Hello, {{ user.username }}! You are logged in.</p>
+    {% else %}
+        <p><a href="{% url 'signup' %}">Sign Up</a> or <a href="{% url 'login' %}">Log In</a> to get started!</p>
+    {% endif %}
+</div>
+{% endblock %}
