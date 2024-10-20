@@ -1,0 +1,40 @@
+<!-- templates/post_list.html -->
+
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h2>All Posts</h2>
+        <div class="post-list mt-4">
+            {% for post in posts %}
+                <div class="post-item mb-5">
+                    <h3>
+                        <a href="{% url 'post_detail' post.id %}">{{ post.author.username }}</a>
+                    </h3>
+                    <p>{{ post.content|truncatewords:30 }}</p>
+                    <p><strong>Posted on:</strong> {{ post.created_at|date:"F j, Y" }}</p>
+                    <!-- If the post has an image, display it -->
+                    {% if post.image %}
+                        <img src="{{ post.image.url }}" class="img-fluid" alt="Post Image">
+                    {% endif %}
+                    <div class="mt-2">
+                        <form method="POST" action="{% url 'like_post' post.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-success">
+                                {% if user in post.likes.all %}
+                                    Unlike
+                                {% else %}
+                                    Like
+                                {% endif %}
+                                ({{ post.likes.count }} Likes)
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <hr>
+            {% empty %}
+                <p>No posts available yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
