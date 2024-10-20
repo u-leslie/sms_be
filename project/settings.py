@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'users',
+    'posts',
 ]
 
 MIDDLEWARE = [
@@ -75,8 +77,12 @@ WSGI_APPLICATION = 'project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'social_media',  # Name of the database
+        'USER': 'postgres',  # Your PostgreSQL username
+        'PASSWORD': 'postgres',  # Your PostgreSQL password
+        'HOST': 'localhost',  # Database server
+        'PORT': '5432',  # PostgreSQL port
     }
 }
 
