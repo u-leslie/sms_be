@@ -1,0 +1,209 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Network{% endblock %}</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      /* Modal styles */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+      .modal-content {
+        background-color: #fff;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 500px;
+        border-radius: 8px;
+      }
+      /* Show the modal */
+      .modal:target {
+        display: block;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 min-h-screen flex flex-col">
+    <div class="flex flex-grow h-screen">
+      <!-- Column 1: Logo and Links (25%) -->
+      <div class="w-1/4 bg-white p-4 shadow-md flex flex-col justify-between">
+        <div>
+          <!-- Logo -->
+          <img
+            src="{% static 'network/logo.png' %}"
+            alt="Logo"
+            class="w-24 h-24 mx-auto mb-8"
+          />
+          <!-- Links -->
+          <div class="space-y-4 text-center">
+            <a
+              href="{% url 'index' %}"
+              class="text-blue-500 hover:underline block"
+              >All Posts</a
+            >
+            {% if user.is_authenticated %}
+            <a
+              href="{% url 'following' %}"
+              class="text-blue-500 hover:underline block"
+              >Following</a
+            >
+            <a
+              href="{% url 'saved' %}"
+              class="text-blue-500 hover:underline block"
+              >Saved</a
+            >
+            <a
+              href="{% url 'profile' user.username %}"
+              class="text-blue-500 hover:underline block"
+              >Profile</a
+            >
+            <a
+              href="{% url 'logout' %}"
+              class="text-blue-500 hover:underline block"
+              >Logout</a
+            >
+            <!-- Create Post Button (links to the modal) -->
+            <a
+              href="#createPostModal"
+              class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 block"
+              >Create Post</a
+            >
+            {% else %}
+            <a
+              href="{% url 'login' %}"
+              class="text-blue-500 hover:underline block"
+              >Login</a
+            >
+            <a
+              href="{% url 'register' %}"
+              class="text-blue-500 hover:underline block"
+              >Sign Up</a
+            >
+            {% endif %}
+          </div>
+        </div>
+        {% if user.is_authenticated %}
+        <!-- User Profile -->
+        <div class="flex items-center space-x-4 p-4">
+          <a href="{% url 'profile' user.username %}">
+            <div
+              class="w-10 h-10 rounded-full bg-cover"
+              style="background-image: url(/media/{{ user.profile_pic }})"
+            ></div>
+          </a>
+          <a href="{% url 'profile' user.username %}" class="text-gray-800">
+            {{ user.first_name }} {{ user.last_name }}<br />
+            <span class="text-gray-500">@{{ user.username }}</span>
+          </a>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Column 2: Posts Section (50%) -->
+      <div class="w-2/4 bg-white p-6 shadow-md overflow-y-auto">
+        {% block body %}
+        <!-- This is where posts will be displayed -->
+        {% endblock %}
+      </div>
+
+      <!-- Column 3: Search and Suggestions (25%) -->
+      <div class="w-1/4 bg-white p-4 shadow-md flex flex-col justify-between">
+        <div>
+          <!-- Search Bar -->
+          <form method="GET" action="">
+            <div class="relative">
+              <input
+                type="text"
+                name="q"
+                placeholder="Search Network"
+                class="w-full p-2 border border-gray-300 rounded-md"
+              />
+              <button
+                type="submit"
+                class="absolute right-2 top-2 text-gray-500"
+              >
+                🔍
+              </button>
+            </div>
+          </form>
+          <!-- Suggestions -->
+          <div class="mt-6 p-4 bg-gray-100 rounded-md">
+            <h3 class="text-lg font-semibold mb-4 text-gray-800">
+              You Might Know
+            </h3>
+            <div>
+              {% for user in other_users %}
+              <a href="{% url 'profile' user.username %}" class="block mb-4">
+                <div class="flex items-center space-x-3">
+                  <div
+                    class="w-8 h-8 rounded-full bg-cover"
+                    style="background-image: url(/media/{{ user.profile_pic }})"
+                  ></div>
+                  <span class="text-gray-800"
+                    >{{ user.first_name }} {{ user.last_name }}</span
+                  >
+                </div>
+              </a>
+              {% empty %}
+              <p class="text-gray-500">No other users found.</p>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for Creating Posts -->
+    <div id="createPostModal" class="modal">
+      <div class="modal-content">
+        <h2 class="text-lg font-bold">Create Post</h2>
+        <form
+          method="POST"
+          action="{% url 'createpost' %}"
+          enctype="multipart/form-data"
+        >
+          {% csrf_token %}
+          <div>
+            <textarea
+              name="text"
+              rows="4"
+              placeholder="What's on your mind?"
+              class="w-full border rounded p-2"
+            ></textarea>
+          </div>
+          <div class="mt-4">
+            <input type="file" name="picture" class="border rounded p-2" />
+          </div>
+          <div class="flex justify-between mt-4">
+            <button
+              type="submit"
+              class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            >
+              Post
+            </button>
+            <a
+              href="#"
+              class="text-red-500 hover:underline"
+              onclick="document.getElementById('createPostModal').style.display='none';"
+              >Cancel</a
+            >
+          </div>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>
