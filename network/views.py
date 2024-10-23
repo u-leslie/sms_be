@@ -7,7 +7,6 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator
 import json
-
 from .models import *
 
 
@@ -338,21 +337,24 @@ def unsave_post(request, id):
 @csrf_exempt
 def follow(request, username):
     if request.user.is_authenticated:
-        if request.method == "PUT":
+        if request.method == "POST":
             user = User.objects.get(username=username)
             print(f".....................User: {user}......................")
             print(
                 f".....................Follower: {request.user}......................"
             )
             try:
-                (follower, create) = Follower.objects.get_or_create(user=user)
+                # Get or create a follow entry
+                (follower, created) = Follower.objects.get_or_create(user=user)
+                # Add the logged-in user to followers
                 follower.followers.add(request.user)
                 follower.save()
-                return HttpResponse(status=204)
+                # Redirect back to the homepage to refresh the list
+                return HttpResponseRedirect(reverse("index"))
             except Exception as e:
-                return HttpResponse(e)
+                return JsonResponse({"error": str(e)}, status=400)
         else:
-            return HttpResponse("Method must be 'PUT'")
+            return JsonResponse({"error": "Method must be 'POST'"}, status=405)
     else:
         return HttpResponseRedirect(reverse("login"))
 
@@ -360,21 +362,23 @@ def follow(request, username):
 @csrf_exempt
 def unfollow(request, username):
     if request.user.is_authenticated:
-        if request.method == "PUT":
+        if request.method == "POST":
             user = User.objects.get(username=username)
             print(f".....................User: {user}......................")
             print(
                 f".....................Unfollower: {request.user}......................"
             )
             try:
+                # Get the follow entry and remove the user from followers
                 follower = Follower.objects.get(user=user)
                 follower.followers.remove(request.user)
                 follower.save()
-                return HttpResponse(status=204)
+                # Redirect back to the homepage to refresh the list
+                return HttpResponseRedirect(reverse("index"))
             except Exception as e:
-                return HttpResponse(e)
+                return JsonResponse({"error": str(e)}, status=400)
         else:
-            return HttpResponse("Method must be 'PUT'")
+            return JsonResponse({"error": "Method must be 'POST'"}, status=405)
     else:
         return HttpResponseRedirect(reverse("login"))
 
@@ -404,6 +408,7 @@ def comment(request, post_id):
     else:
         return HttpResponseRedirect(reverse("login"))
 
+
 @csrf_exempt
 def delete_post(request, post_id):
     if request.user.is_authenticated:
@@ -423,3 +428,37 @@ def delete_post(request, post_id):
             )  # Method not allowed
     else:
         return HttpResponse(status=401)  # Unauthorized
+
+
+def followers_list(request, username):
+    profile_user = get_object_or_404(User, username=username)
+    followers = Follower.objects.get(
+        user=profile_user
+    ).followers.all()  # Get all followers
+    return render(
+        request,
+        "network/followers.html",
+        {
+            "profile_user": profile_user,
+            "followers": followers,
+        },
+    )
+
+
+# View to show the list of users the profile is following
+def following_list(request, username):
+    profile_user = get_object_or_404(User, username=username)
+    following_users = Follower.objects.filter(followers=profile_user).values_list(
+        "user", flat=True
+    )
+    following = User.objects.filter(
+        id__in=following_users
+    )  # Get all users being followed
+    return render(
+        request,
+        "network/following.html",
+        {
+            "profile_user": profile_user,
+            "following": following,
+        },
+    )
