@@ -141,28 +141,74 @@
             </div>
           </form>
           <!-- Suggestions -->
+          {% if user.is_authenticated %}
           <div class="mt-6 p-4 bg-gray-100 rounded-md">
             <h3 class="text-lg font-semibold mb-4 text-gray-800">
               You Might Know
             </h3>
             <div>
-              {% for user in other_users %}
-              <a href="{% url 'profile' user.username %}" class="block mb-4">
-                <div class="flex items-center space-x-3">
-                  <div
-                    class="w-8 h-8 rounded-full bg-cover"
-                    style="background-image: url(/media/{{ user.profile_pic }})"
-                  ></div>
-                  <span class="text-gray-800"
-                    >{{ user.first_name }} {{ user.last_name }}</span
+              {% for suggestion in suggestions %}
+              <div class="flex justify-between items-center mb-4">
+                <a href="{% url 'profile' suggestion.username %}" class="block">
+                  <div class="flex items-center space-x-3">
+                    <div
+                      class="w-8 h-8 rounded-full bg-cover"
+                      style="background-image: url(/media/{{ suggestion.profile_pic }})"
+                    ></div>
+                    <span class="text-gray-800"
+                      >{{ suggestion.first_name }} {{ suggestion.last_name
+                      }}</span
+                    >
+                  </div>
+                </a>
+                {% if request.user in suggestion.follower.followers.all %}
+                <!-- Unfollow Button -->
+                <form
+                  action="{% url 'unfollow' suggestion.username %}"
+                  method="POST"
+                >
+                  {% csrf_token %}
+                  <button
+                    type="submit"
+                    class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
                   >
-                </div>
-              </a>
+                    Unfollow
+                  </button>
+                </form>
+                {% else %}
+                <!-- Follow Button -->
+                <form
+                  action="{% url 'followuser' suggestion.username %}"
+                  method="POST"
+                >
+                  {% csrf_token %}
+                  <button
+                    type="submit"
+                    class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                  >
+                    Follow
+                  </button>
+                </form>
+                {% endif %}
+              </div>
               {% empty %}
               <p class="text-gray-500">No other users found.</p>
               {% endfor %}
             </div>
           </div>
+          {% else %}
+          <div
+            class="mt-6 p-4 bg-gray-100 rounded-md flex flex-col items-center justify-center"
+          >
+            <h2 class="text-lg font-semibold mb-4 text-gray-800">
+              New to Network?
+            </h2>
+            <p>Sign up to get connected with new friends</p>
+            <button class="bg-blue-500 text-white rounded-2xl w-full h-8">
+              <a href="{% url 'register' %}">Sign up</a>
+            </button>
+          </div>
+          {% endif %}
         </div>
       </div>
     </div>

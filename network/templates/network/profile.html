@@ -24,7 +24,7 @@
         </button>
         {% elif is_follower %}
         <button
-          class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+          class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
         >
           Following
         </button>
@@ -51,14 +51,20 @@
           <span class="text-gray-500">Posts</span>
         </div>
         <div>
-          <a href="#" class="hover:text-blue-500">
+          <a
+            href="{% url 'following' username.username %}"
+            class="hover:text-blue-500"
+          >
             <strong class="text-xl">{{following_count | default:0}}</strong
             ><br />
             <span class="text-gray-500">Following</span>
           </a>
         </div>
         <div>
-          <a href="#" class="hover:text-blue-500">
+          <a
+            href="{% url 'followers' username.username %}"
+            class="hover:text-blue-500"
+          >
             <strong class="text-xl">{{follower_count | default:0}}</strong
             ><br />
             <span class="text-gray-500">Followers</span>
