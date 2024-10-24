@@ -155,10 +155,9 @@
                       class="w-8 h-8 rounded-full bg-cover"
                       style="background-image: url(/media/{{ suggestion.profile_pic }})"
                     ></div>
-                    <span class="text-gray-800"
-                      >{{ suggestion.first_name }} {{ suggestion.last_name
-                      }}</span
-                    >
+                    <span class="text-gray-800">
+                      {{ suggestion.first_name }} {{ suggestion.last_name }}
+                    </span>
                   </div>
                 </a>
                 {% if request.user in suggestion.follower.followers.all %}
