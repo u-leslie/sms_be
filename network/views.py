@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
@@ -230,37 +230,40 @@ def create_post(request):
 @login_required
 @csrf_exempt
 def edit_post(request, post_id):
+    post = Post.objects.get(id=post_id)
+
+    # Check if the user is the creator of the post
+    if request.user != post.creater:
+        return HttpResponse(status=403)  # Forbidden
+
     if request.method == "POST":
+        # Check if the user is switching to edit mode
+        if request.POST.get("edit_mode") == "true":
+            post.edit_mode = True
+            post.save()
+            return redirect("profile", username=request.user.username)
+
+        # Save the edited post
         text = request.POST.get("text")
         pic = request.FILES.get("picture")
         img_chg = request.POST.get("img_change")
-        post_id = request.POST.get("id")
-        post = Post.objects.get(id=post_id)
+
         try:
-            post.content_text = text
-            if img_chg != "false":
-                post.content_image = pic
+            post.content_text = text  # Update post content
+            if img_chg == "true" and pic:
+                post.content_image = pic  # Update image if provided
+
+            post.edit_mode = False  # Turn off edit mode after saving
             post.save()
 
-            if post.content_text:
-                post_text = post.content_text
-            else:
-                post_text = False
-            if post.content_image:
-                post_image = post.img_url()
-            else:
-                post_image = False
-
-            return JsonResponse(
-                {"success": True, "text": post_text, "picture": post_image}
-            )
+            return redirect(
+                "profile", username=request.user.username
+            )  # Redirect to profile page
         except Exception as e:
-            print("-----------------------------------------------")
             print(e)
-            print("-----------------------------------------------")
-            return JsonResponse({"success": False})
-    else:
-        return HttpResponse("Method must be 'POST'")
+            return JsonResponse({"success": False, "error": str(e)})
+
+    return HttpResponse(status=405)  # Method not allowed
 
 
 @csrf_exempt
@@ -418,7 +421,9 @@ def delete_post(request, post_id):
                 post = Post.objects.get(id=post_id)
                 if request.user == post.creater:
                     post.delete()  # Delete the post
-                    return HttpResponse(status=204)  # Successful deletion
+                    return redirect(
+                        "profile", username=request.user.username
+                    )  # Successful deletion
                 else:
                     return HttpResponse(status=403)  # Forbidden (not the creator)
             except Post.DoesNotExist:
