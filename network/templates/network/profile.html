@@ -40,8 +40,8 @@
 
       <!-- Join Date -->
       <div class="text-gray-500 mb-4">
-        <i class="far fa-calendar-alt"></i> &nbsp; Joined {{
-        username.date_joined | date: "F Y" }}
+        <i class="far fa-calendar-alt"></i> &nbsp; Joined {{ username.date_joined|date:"F Y" }}
+
       </div>
 
       <!-- Posts, Following, Followers -->
@@ -76,8 +76,8 @@
     {% for post in posts %}
     <div class="bg-white p-4 rounded-lg shadow-md">
       <!-- Post content -->
-      {% if post.edit_mode %}
-      <form
+      <!-- {% if post.edit_mode %} -->
+      <!-- <form
         action="{% url 'editpost' post.id %}"
         method="POST"
         enctype="multipart/form-data"
@@ -93,8 +93,8 @@
         >
           Save
         </button>
-      </form>
-      {% else %}
+      </form> -->
+      <!-- {% else %} -->
       <p>{{ post.content_text }}</p>
       {% if post.content_image %}
       <img
@@ -107,18 +107,6 @@
       <!-- Conditionally show Edit/Delete buttons for the post creator -->
       {% if post.creater == request.user %}
       <div class="flex justify-end space-x-4 mt-4">
-        <!-- Edit Button -->
-        <form action="{% url 'editpost' post.id %}" method="POST">
-          {% csrf_token %}
-          <input type="hidden" name="edit_mode" value="true" />
-          <button
-            type="submit"
-            class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
-          >
-            Edit
-          </button>
-        </form>
-
         <!-- Delete Button -->
         <form
           action="{% url 'deletepost' post.id %}"
