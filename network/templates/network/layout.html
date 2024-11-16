@@ -6,32 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}Network{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
-    <style>
-      .modal {
-        display: none;
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgba(0, 0, 0, 0.5);
-      }
-      .modal-content {
-        background-color: #fff;
-        margin: 15% auto;
-        padding: 20px;
-        border: 1px solid #888;
-        width: 80%;
-        max-width: 500px;
-        border-radius: 8px;
-      }
-      /* Show the modal */
-      .modal:target {
-        display: block;
-      }
-    </style>
+    <link rel="stylesheet" src="style.css"/>
   </head>
   <body class="bg-gray-100 min-h-screen flex flex-col">
     <div class="flex flex-grow h-screen">
@@ -121,7 +96,6 @@
         </div>
       </div>
     </div>
-
     <div id="createPostModal" class="modal">
       <div class="modal-content">
         <h2 class="text-lg font-bold">Create Post</h2>
