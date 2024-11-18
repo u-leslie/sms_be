@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}Network{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
-    <link rel="stylesheet" src="style.css"/>
+    <link rel="stylesheet" href="{% static 'style.css' %}"/>
   </head>
   <body class="bg-gray-100 min-h-screen flex flex-col">
     <div class="flex flex-grow h-screen">
@@ -20,7 +20,7 @@
             <a href="{% url 'saved' %}" class="text-blue-500 hover:underline block" >Saved</a>
             <a href="{% url 'profile' user.username %}" class="text-blue-500 hover:underline block" >Profile</a>
             <a href="{% url 'logout' %}" class="text-blue-500 hover:underline block" >Logout</a>
-            <a href="#createPostModal" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 block" >Create Post</a>
+            <a href="#createPostModal" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 block">Create Post</a>
             {% else %}
             <a href="{% url 'login' %}" class="text-blue-500 hover:underline block" >Login</a>
             <a href="{% url 'register' %}" class="text-blue-500 hover:underline block" >Sign Up</a>
@@ -102,14 +102,23 @@
         <form method="POST" action="{% url 'createpost' %}" enctype="multipart/form-data">
           {% csrf_token %}
           <div>
-            <textarea name="text" rows="4" placeholder="What's on your mind?" class="w-full border rounded p-2"></textarea>
+            <textarea
+              name="text"
+              rows="4"
+              placeholder="What's on your mind?"
+              class="w-full border rounded p-2"
+            ></textarea>
           </div>
           <div class="mt-4">
             <input type="file" name="picture" class="border rounded p-2" />
           </div>
           <div class="flex justify-between mt-4">
-            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Post</button>
-            <a href="#" class="text-red-500 hover:underline" onclick="document.getElementById('createPostModal').style.display='none';">Cancel</a>
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+              Post
+            </button>
+            <a href="#" class="text-red-500 hover:underline">
+              Cancel
+            </a>
           </div>
         </form>
       </div>

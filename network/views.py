@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator
 import json
 from .models import *
-from .forms import ProfileEditForm
+from .forms import ProfileEditForm,LoginForm,RegisterForm
 
 def index(request):
     all_posts = Post.objects.all().order_by("-date_created")
@@ -27,16 +27,21 @@ def index(request):
 
 def login_view(request):
     if request.method == "POST":
-        username = request.POST["username"]
-        password = request.POST["password"]
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            return HttpResponseRedirect(reverse("index"))
-        else:
-            return render( request, "network/login.html", {"message": "Invalid username and/or password."},)
+        form = LoginForm(data=request.POST)
+        if form.is_valid():
+            # Log the user in
+            login(request, form.get_user())
+            return redirect("index")
     else:
-        return render(request, "network/login.html")
+        form = LoginForm()
+    
+    context = {
+        "form": form,
+        "title": "Log in to Network",
+        "button_label": "Log In",
+        "show_signup_link": True,
+    }
+    return render(request, "network/layout2.html", context)
 
 def logout_view(request):
     logout(request)
@@ -44,35 +49,20 @@ def logout_view(request):
 
 def register(request):
     if request.method == "POST":
-        username = request.POST["username"]
-        email = request.POST["email"]
-        fname = request.POST["firstname"]
-        lname = request.POST["lastname"]
-        profile = request.FILES.get("profile")
-        print(f"---Profile: {profile}---")
-        cover = request.FILES.get("cover")
-        print(f"---Cover: {cover}---")
-        password = request.POST["password"]
-        confirmation = request.POST["confirmation"]
-        if password != confirmation:
-            return render(request, "network/register.html", {"message": "Passwords must match."})
-        try:
-            user = User.objects.create_user(username, email, password)
-            user.first_name = fname
-            user.last_name = lname
-            if profile is not None:
-                user.profile_pic = profile
-            else:
-                user.profile_pic = "profile_pic/no_pic.png"
-            user.cover = cover
-            user.save()
-            Follower.objects.create(user=user)
-        except IntegrityError:
-            return render(request, "network/register.html", {"message": "Username already taken."})
-        login(request, user)
-        return HttpResponseRedirect(reverse("index"))
+        form = RegisterForm(request.POST, request.FILES)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect("index")
     else:
-        return render(request, "network/register.html")
+        form = RegisterForm()
+    context = {
+        "form": form,
+        "title": "Sign up for Network",
+        "button_label": "Sign Up",
+        "show_login_link": True,
+    }
+    return render(request, "network/layout2.html", context)
 
 def profile(request, username):
     user = get_object_or_404(User, username=username)
@@ -102,15 +92,18 @@ def edit_profile(request, username):
         form = ProfileEditForm(request.POST, request.FILES, instance=user_profile)
         if form.is_valid():
             form.save()
-            return redirect('profile', username=user_profile.username)  # Redirect to the profile page
+            return redirect('profile', username=user_profile.username) 
     else:
         form = ProfileEditForm(instance=user_profile)
 
     context = {
         'form': form,
         'username': user_profile.username,
+        "title": "Edit Profile",
+        "button_label": "Save Changes",
+
     }
-    return render(request, 'network/editprofile.html', context)  # Create this template for the edit form
+    return render(request, 'network/layout2.html', context)  
 
 
 def following(request):
@@ -156,30 +149,6 @@ def create_post(request):
         return HttpResponse("Method must be 'POST'")
 
 @login_required
-@csrf_exempt
-def edit_post(request, post_id):
-    post = Post.objects.get(id=post_id)
-    if request.user != post.creater:
-        return HttpResponse(status=403)
-    if request.method == "POST":
-        if request.POST.get("edit_mode") == "true":
-            post.edit_mode = True
-            post.save()
-            return redirect("profile", username=request.user.username)
-        text = request.POST.get("text")
-        pic = request.FILES.get("picture")
-        img_chg = request.POST.get("img_change")
-        try:
-            post.content_text = text
-            if img_chg == "true" and pic:
-                post.content_image = pic
-            post.edit_mode = False
-            post.save()
-            return redirect("profile", username=request.user.username)  
-        except Exception as e:
-            print(e)
-            return JsonResponse({"success": False, "error": str(e)})
-    return HttpResponse(status=405)
 
 @csrf_exempt
 def like_post(request, id):
