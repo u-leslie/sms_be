@@ -1,50 +1,31 @@
 {% extends 'network/index.html' %} {% load static %} {% block profile %}
 <div class="w-full">
-  <!-- Cover image section -->
-  <div
-    class="h-48 bg-cover bg-center"
-    style="background-image: url(/media/{{username.cover}});"
-  ></div>
+  <div class="h-48 bg-cover bg-center" style="background-image: url(/media/{{username.cover}});"></div>
 
-  <!-- Profile picture and info section -->
   <div class="flex flex-col items-center -mt-16">
-    <div
-      class="w-32 h-32 bg-cover bg-center rounded-full border-4 border-white"
-      style="background-image: url(/media/{{username.profile_pic}});"
-    ></div>
+    <div class="w-32 h-32 bg-cover bg-center rounded-full border-4 border-white" style="background-image: url(/media/{{username.profile_pic}});"></div>
 
     <div class="text-center mt-4">
-      <!-- Edit or Follow Button -->
       <div class="mb-4">
         {% if user.username == username.username %}
-        <button
-          class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-        >
+        <button class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
           <a href="{% url 'editprofile' username %}">Edit Profile</a>
         </button>
         {% elif is_follower %}
-        <button
-          class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-        >
+        <button class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
           Following
         </button>
         {% else %}
-        <button
-          class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-          onclick="follow_user(this, '{{username.username}}', 'edit_page')"
-        >
+        <button class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600" onclick="follow_user(this, '{{username.username}}', 'edit_page')">
           Follow
         </button>
         {% endif %}
       </div>
 
-      <!-- Join Date -->
       <div class="text-gray-500 mb-4">
         <i class="far fa-calendar-alt"></i> &nbsp; Joined {{ username.date_joined|date:"F Y" }}
 
       </div>
-
-      <!-- Posts, Following, Followers -->
       <div class="flex space-x-8 text-center">
         <div>
           <strong class="text-xl">{{posts_count}}</strong><br />
@@ -75,26 +56,6 @@
   <div class="grid gap-4">
     {% for post in posts %}
     <div class="bg-white p-4 rounded-lg shadow-md">
-      <!-- Post content -->
-      <!-- {% if post.edit_mode %} -->
-      <!-- <form
-        action="{% url 'editpost' post.id %}"
-        method="POST"
-        enctype="multipart/form-data"
-      >
-        {% csrf_token %}
-        <textarea name="text" class="w-full px-4 py-2 border rounded-md">
-{{ post.content_text }}</textarea
-        >
-        <input type="file" name="picture" class="mt-2" />
-        <button
-          type="submit"
-          class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-        >
-          Save
-        </button>
-      </form> -->
-      <!-- {% else %} -->
       <p>{{ post.content_text }}</p>
       {% if post.content_image %}
       <img
@@ -104,20 +65,11 @@
       />
       {% endif %}
 
-      <!-- Conditionally show Edit/Delete buttons for the post creator -->
       {% if post.creater == request.user %}
       <div class="flex justify-end space-x-4 mt-4">
-        <!-- Delete Button -->
-        <form
-          action="{% url 'deletepost' post.id %}"
-          method="POST"
-          onsubmit="return confirm('Are you sure you want to delete this post?');"
-        >
+        <form action="{% url 'deletepost' post.id %}" method="POST" onsubmit="return confirm('Are you sure you want to delete this post?');">
           {% csrf_token %}
-          <button
-            type="submit"
-            class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
-          >
+          <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
             Delete
           </button>
         </form>
