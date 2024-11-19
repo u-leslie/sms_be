@@ -1,9 +1,13 @@
-{% extends 'network/index.html' %} {% load static %} {% block profile %}
+{% extends 'network/index.html' %}
+{% load static %}
+{% block profile %}
 <div class="w-full">
-  <div class="h-48 bg-cover bg-center" style="background-image: url(/media/{{username.cover}});"></div>
+  <!-- Cover Image -->
+  <div class="h-48 bg-cover bg-center" style="background-image: url(/media/{{ username.cover }});"></div>
 
+  <!-- Profile Picture and User Info -->
   <div class="flex flex-col items-center -mt-16">
-    <div class="w-32 h-32 bg-cover bg-center rounded-full border-4 border-white" style="background-image: url(/media/{{username.profile_pic}});"></div>
+    <div class="w-32 h-32 bg-cover bg-center rounded-full border-4 border-white" style="background-image: url(/media/{{ username.profile_pic }});"></div>
 
     <div class="text-center mt-4">
       <div class="mb-4">
@@ -16,32 +20,31 @@
           Following
         </button>
         {% else %}
-        <button class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600" onclick="follow_user(this, '{{username.username}}', 'edit_page')">
-          Follow
+        <button class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+          <a href="{% url 'follow' username %}">Follow</a>
         </button>
         {% endif %}
       </div>
 
       <div class="text-gray-500 mb-4">
         <i class="far fa-calendar-alt"></i> &nbsp; Joined {{ username.date_joined|date:"F Y" }}
-
       </div>
+
+      <!-- Stats with Modals -->
       <div class="flex space-x-8 text-center">
         <div>
-          <strong class="text-xl">{{posts_count}}</strong><br />
+          <strong class="text-xl">{{ posts_count }}</strong><br />
           <span class="text-gray-500">Posts</span>
         </div>
         <div>
-          <a href="{% url 'following' username %}" class="hover:text-blue-500">
-            <strong class="text-xl">{{following_count | default:0}}</strong
-            ><br />
+          <a href="#followingModal" class="hover:text-blue-500">
+            <strong class="text-xl">{{ following_count }}</strong><br />
             <span class="text-gray-500">Following</span>
           </a>
         </div>
         <div>
-          <a href="{% url 'followers' username %}" class="hover:text-blue-500">
-            <strong class="text-xl">{{follower_count | default:0}}</strong
-            ><br />
+          <a href="#followersModal" class="hover:text-blue-500">
+            <strong class="text-xl">{{ follower_count }}</strong><br />
             <span class="text-gray-500">Followers</span>
           </a>
         </div>
@@ -50,7 +53,7 @@
   </div>
 </div>
 
-<!-- Post Section -->
+<!-- Posts Section -->
 <div class="w-full mt-8">
   {% if posts %}
   <div class="grid gap-4">
@@ -58,11 +61,7 @@
     <div class="bg-white p-4 rounded-lg shadow-md">
       <p>{{ post.content_text }}</p>
       {% if post.content_image %}
-      <img
-        src="/media/{{ post.content_image }}"
-        class="w-full mt-2 rounded-md"
-        alt="Post Image"
-      />
+      <img src="/media/{{ post.content_image }}" class="w-full mt-2 rounded-md" alt="Post Image" />
       {% endif %}
 
       {% if post.creater == request.user %}
@@ -74,15 +73,94 @@
           </button>
         </form>
       </div>
-      {% endif %} {% endif %}
+      {% endif %}
     </div>
     {% endfor %}
   </div>
-  {% else %} {% block emptyprofile %}
+  {% else %}
   <center class="mt-8">
-    <strong class="text-gray-700">@{{username}} hasn't posted</strong>
-    <div class="text-gray-500">When they do, their posts will show up here</div>
+    <strong class="text-gray-700">@{{ username.username }} hasn't posted yet.</strong>
+    <div class="text-gray-500">When they do, their posts will show up here.</div>
   </center>
-  {% endblock %} {% endif %}
+  {% endif %}
 </div>
+
+<!-- Followers Modal -->
+<div id="followersModal" class="modal">
+  <div class="modal-content">
+    <a href="#" class="modal-close">&times;</a>
+    <h2 class="text-xl font-bold">Followers</h2>
+    <ul class="mt-4">
+      {% for follower in followers %}
+      <li class="mb-2">
+        <a href="{% url 'profile' follower.username %}" class="hover:underline text-blue-600">
+          {{ follower.username }}
+        </a>
+      </li>
+      {% empty %}
+      <p>No followers yet.</p>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+
+<!-- Following Modal -->
+<div id="followingModal" class="modal">
+  <div class="modal-content">
+    <a href="#" class="modal-close">&times;</a>
+    <h2 class="text-xl font-bold">Following</h2>
+    <ul class="mt-4">
+      {% for user in following %}
+      <li class="mb-2">
+        <a href="{% url 'profile' user.username %}" class="hover:underline text-blue-600">
+          {{ user.username }}
+        </a>
+      </li>
+      {% empty %}
+      <p>Not following anyone yet.</p>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+
+<style>
+  /* Modal Styles */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 50;
+  }
+
+  .modal:target {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 400px;
+  }
+
+  .modal-close {
+    text-decoration: none;
+    font-size: 1.5rem;
+    color: black;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+
+  .modal-close:hover {
+    color: red;
+  }
+</style>
 {% endblock %}
