@@ -63,9 +63,10 @@ def register(request):
         "show_login_link": True,
     }
     return render(request, "network/layout2.html", context)
+
 def profile(request, username):
     user = get_object_or_404(User, username=username)
-    all_posts = Post.objects.filter(creater=user).order_by("-date_created")
+    all_posts = Post.objects.filter(creater=user).distinct().order_by("-date_created")
     paginator = Paginator(all_posts, 10)
     page_number = request.GET.get("page", 1)
     posts = paginator.get_page(page_number)
@@ -84,6 +85,7 @@ def profile(request, username):
         {
             "username": user,
             "posts": posts,
+            "page": 'profile',
             "posts_count": all_posts.count(),
             "followers": User.objects.filter(pk__in=followers),
             "following": User.objects.filter(pk__in=following),
@@ -287,13 +289,13 @@ def delete_post(request, post_id):
     else:
         return HttpResponse(status=401) 
 
-def followers_list(request, username):
-    profile_user = get_object_or_404(User, username=username)
-    followers = Follower.objects.get(user=profile_user).followers.all() 
-    return render(request,"network/followers.html",{"profile_user": profile_user,"followers": followers,})
+# def followers_list(request, username):
+#     profile_user = get_object_or_404(User, username=username)
+#     followers = Follower.objects.get(user=profile_user).followers.all() 
+#     return render(request,"network/followers.html",{"profile_user": profile_user,"followers": followers,})
 
-def following_list(request, username):
-    profile_user = get_object_or_404(User, username=username)
-    following_users = Follower.objects.filter(followers=profile_user).values_list("user", flat=True)
-    following = User.objects.filter(id__in=following_users)
-    return render(request,"network/following.html",{"profile_user": profile_user,"following": following,},)
+# def following_list(request, username):
+#     profile_user = get_object_or_404(User, username=username)
+#     following_users = Follower.objects.filter(followers=profile_user).values_list("user", flat=True)
+#     following = User.objects.filter(id__in=following_users)
+#     return render(request,"network/following.html",{"profile_user": profile_user,"following": following,},)

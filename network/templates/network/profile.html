@@ -1,36 +1,25 @@
-{% extends 'network/index.html' %}
-{% load static %}
+{% extends "network/index.html" %}
+
 {% block profile %}
 <div class="w-full">
-  <!-- Cover Image -->
+  <!-- Cover and Profile Picture -->
   <div class="h-48 bg-cover bg-center" style="background-image: url(/media/{{ username.cover }});"></div>
-
-  <!-- Profile Picture and User Info -->
   <div class="flex flex-col items-center -mt-16">
     <div class="w-32 h-32 bg-cover bg-center rounded-full border-4 border-white" style="background-image: url(/media/{{ username.profile_pic }});"></div>
-
     <div class="text-center mt-4">
       <div class="mb-4">
         {% if user.username == username.username %}
-        <button class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
-          <a href="{% url 'editprofile' username %}">Edit Profile</a>
-        </button>
+          <a href="{% url 'editprofile' username %}" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Edit Profile</a>
         {% elif is_follower %}
-        <button class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
-          Following
-        </button>
+          <button class="px-4 py-2 bg-gray-300 text-black rounded-md cursor-default">Following</button>
         {% else %}
-        <button class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
-          <a href="{% url 'follow' username %}">Follow</a>
-        </button>
+          <button class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Follow</button>
         {% endif %}
       </div>
-
       <div class="text-gray-500 mb-4">
         <i class="far fa-calendar-alt"></i> &nbsp; Joined {{ username.date_joined|date:"F Y" }}
       </div>
-
-      <!-- Stats with Modals -->
+      <!-- Stats with Modal Links -->
       <div class="flex space-x-8 text-center">
         <div>
           <strong class="text-xl">{{ posts_count }}</strong><br />
@@ -56,111 +45,60 @@
 <!-- Posts Section -->
 <div class="w-full mt-8">
   {% if posts %}
-  <div class="grid gap-4">
-    {% for post in posts %}
-    <div class="bg-white p-4 rounded-lg shadow-md">
-      <p>{{ post.content_text }}</p>
-      {% if post.content_image %}
-      <img src="/media/{{ post.content_image }}" class="w-full mt-2 rounded-md" alt="Post Image" />
-      {% endif %}
-
-      {% if post.creater == request.user %}
-      <div class="flex justify-end space-x-4 mt-4">
-        <form action="{% url 'deletepost' post.id %}" method="POST" onsubmit="return confirm('Are you sure you want to delete this post?');">
-          {% csrf_token %}
-          <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
-            Delete
-          </button>
-        </form>
-      </div>
-      {% endif %}
+    <div class="grid gap-4">
+      {% for post in posts %}
+        <div class="bg-white p-4 rounded-lg shadow-md">
+          <p>{{ post.content_text }}</p>
+          {% if post.content_image %}
+            <img src="/media/{{ post.content_image }}" class="w-full mt-2 rounded-md" alt="Post Image"/>
+          {% endif %}
+        </div>
+      {% endfor %}
     </div>
-    {% endfor %}
-  </div>
   {% else %}
-  <center class="mt-8">
-    <strong class="text-gray-700">@{{ username.username }} hasn't posted yet.</strong>
-    <div class="text-gray-500">When they do, their posts will show up here.</div>
-  </center>
+    <center class="mt-8">
+      <strong class="text-gray-700">@{{ username.username }} hasn't posted yet.</strong>
+      <div class="text-gray-500">When they do, their posts will show up here.</div>
+    </center>
   {% endif %}
 </div>
 
 <!-- Followers Modal -->
-<div id="followersModal" class="modal">
+<div id="followersModal" class="modal hidden">
   <div class="modal-content">
-    <a href="#" class="modal-close">&times;</a>
-    <h2 class="text-xl font-bold">Followers</h2>
-    <ul class="mt-4">
+    <h2 class="text-xl font-bold mb-4">Followers</h2>
+    <ul>
       {% for follower in followers %}
-      <li class="mb-2">
-        <a href="{% url 'profile' follower.username %}" class="hover:underline text-blue-600">
-          {{ follower.username }}
-        </a>
-      </li>
+        <li class="mb-2">
+          <a href="{% url 'profile' follower.username %}" class="hover:underline">
+            {{ follower.username }}
+          </a>
+        </li>
       {% empty %}
-      <p>No followers yet.</p>
+        <li>No followers yet.</li>
       {% endfor %}
     </ul>
+    <a href="#" class="mt-4 text-red-500 hover:underline">Close</a>
   </div>
 </div>
 
 <!-- Following Modal -->
-<div id="followingModal" class="modal">
+<div id="followingModal" class="modal hidden">
   <div class="modal-content">
-    <a href="#" class="modal-close">&times;</a>
-    <h2 class="text-xl font-bold">Following</h2>
-    <ul class="mt-4">
+    <h2 class="text-xl font-bold mb-4">Following</h2>
+    <ul>
       {% for user in following %}
-      <li class="mb-2">
-        <a href="{% url 'profile' user.username %}" class="hover:underline text-blue-600">
-          {{ user.username }}
-        </a>
-      </li>
+        <li class="mb-2">
+          <a href="{% url 'profile' user.username %}" class="hover:underline">
+            {{ user.username }}
+          </a>
+        </li>
       {% empty %}
-      <p>Not following anyone yet.</p>
+        <li>Not following anyone yet.</li>
       {% endfor %}
     </ul>
+    <a href="#" class="mt-4 text-red-500 hover:underline">Close</a>
   </div>
 </div>
 
-<style>
-  /* Modal Styles */
-  .modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 50;
-  }
-
-  .modal:target {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .modal-content {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    width: 90%;
-    max-width: 400px;
-  }
-
-  .modal-close {
-    text-decoration: none;
-    font-size: 1.5rem;
-    color: black;
-    position: absolute;
-    top: 10px;
-    right: 10px;
-  }
-
-  .modal-close:hover {
-    color: red;
-  }
-</style>
 {% endblock %}

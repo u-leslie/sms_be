@@ -1,14 +1,26 @@
-{% extends "network/layout.html" %} {% load static %} {% block body %}
+{% extends "network/layout.html" %} 
+{% load static %} 
+{% block body %}
 <div class="main-div">
   <div class="left-div">
     <nav class="head text-xl font-bold">
-      {% if page == 'all_posts' %} All Posts {% elif page == 'following' %}
-      Following {% elif page == 'saved' %} Saved {% elif page == 'profile' %}
-      Profile {% else %} Explore {% endif %}
+      {% if page == 'all_posts' %} 
+        All Posts 
+      {% elif page == 'following' %}
+        Following 
+      {% elif page == 'saved' %} 
+        Saved 
+      {% elif page == 'profile' %}
+        Profile 
+      {% else %} 
+        Explore 
+      {% endif %}
     </nav>
     <div class="left-div-content">
       <div class="posts-view">
         {% block profile %}{% endblock %}
+        
+        <!-- Render posts only if the page is NOT the profile page -->
         {% if page != 'profile' %}
         <div class="main-div-content">
           {% for post in posts %}
